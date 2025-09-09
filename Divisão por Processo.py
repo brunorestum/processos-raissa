@@ -12,11 +12,10 @@ from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 import nltk
 from nltk.stem import RSLPStemmer
-from collections import Counter
+from nltk.corpus import stopwords
 
 # --- Baixar stopwords ---
 nltk.download("stopwords")
-from nltk.corpus import stopwords
 stopwords_pt = set(stopwords.words("portuguese"))
 
 st.set_page_config(page_title="Análise de Processos", layout="wide")
@@ -53,31 +52,27 @@ if "data" in df.columns:
         fig3 = px.line(timeline, x="data", y="quantidade", markers=True)
         st.plotly_chart(fig3, use_container_width=True)
 
-# ======== WordCloud com radical + palavra completa ========
-st.subheader("☁️ Palavras mais frequentes nos Assuntos (agrupadas por radical)")
+# ======== WordCloud com RADICAIS ========
+st.subheader("☁️ Radicais mais frequentes nos Assuntos")
 
 if "assunto" in df.columns:
     stemmer = RSLPStemmer()
     textos = df["assunto"].dropna().astype(str).tolist()
 
-    # Mapeamento: radical -> todas as palavras correspondentes
-    radical_map = {}
+    # Extrair radicais, removendo stopwords
+    radicais = []
     for texto in textos:
         for palavra in texto.lower().split():
             palavra = palavra.strip(".,;:!?()[]{}")
             if palavra and palavra not in stopwords_pt:
-                rad = stemmer.stem(palavra)
-                if rad not in radical_map:
-                    radical_map[rad] = []
-                radical_map[rad].append(palavra)
+                radicais.append(stemmer.stem(palavra))
 
-    # Para cada radical, pegar a palavra mais frequente correspondente
-    palavras_completas = [Counter(pals).most_common(1)[0][0] for pals in radical_map.values()]
-
-    # Criar WordCloud
-    texto_wc = " ".join(palavras_completas)
+    # Criar WordCloud dos radicais
+    texto_wc = " ".join(radicais)
     wordcloud = WordCloud(
-        width=800, height=400, background_color="white", colormap="viridis"
+        width=800, height=400,
+        background_color="white",
+        colormap="viridis"
     ).generate(texto_wc)
 
     fig4, ax = plt.subplots(figsize=(10, 5))
