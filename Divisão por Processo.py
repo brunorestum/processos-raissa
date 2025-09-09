@@ -80,31 +80,26 @@ if "data" in df.columns:
 # ======================
 # Agrupamento de Assuntos (PNL + KMeans)
 # ======================
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.cluster import KMeans
-import pandas as pd
-import plotly.express as px
-import streamlit as st
-
 st.subheader("🤖 Agrupamento de Assuntos (NLP)")
 
 if "assunto" in df.columns:
     textos = df["assunto"].dropna().astype(str)
-    
-    stopwords_pt = [
-        "de", "do", "da", "em", "para", "com", "sem",
-        "a", "o", "e", "os", "as", "um", "uma",
-        "por", "na", "no", "nas", "nos", "se"
-    ]
-    
-    # Ensure stopwords are a list
-    vectorizer = TfidfVectorizer(stop_words=list(stopwords_pt))
+
+    # Lista simples de stopwords em português
+    stopwords_pt = {
+    "de", "do", "da", "em", "para", "com", "sem",
+    "a", "o", "e", "os", "as", "um", "uma",
+    "por", "na", "no", "nas", "nos", "se"
+}
+
+vectorizer = TfidfVectorizer(stop_words=frozenset(stopwords_pt))
     X = vectorizer.fit_transform(textos)
-    
-    n_clusters = 5
+
+    # KMeans
+    n_clusters = 5  # número de grupos de assuntos
     kmeans = KMeans(n_clusters=n_clusters, random_state=42, n_init=10)
     clusters = kmeans.fit_predict(X)
-    
+
     df_clusters = pd.DataFrame({"assunto": textos, "cluster": clusters})
     fig4 = px.histogram(
         df_clusters,
@@ -113,7 +108,7 @@ if "assunto" in df.columns:
         title="Distribuição de Assuntos por Cluster"
     )
     st.plotly_chart(fig4, use_container_width=True)
-    
+
     st.write("🔍 Exemplos de assuntos por cluster:")
     for c in range(n_clusters):
         exemplos = df_clusters[df_clusters["cluster"] == c]["assunto"].head(5).tolist()
