@@ -9,11 +9,14 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 
-# Configuração inicial da página
+# Configuração inicial
 st.set_page_config(page_title="Análise de Processos", layout="wide")
 
-# Carregar CSV
-df = pd.read_csv("processos.csv")
+# URL do CSV no GitHub (substitua pelo seu link raw!)
+url = "https://raw.githubusercontent.com/usuario/repositorio/branch/processos.csv"
+
+# Carregar CSV direto do GitHub
+df = pd.read_csv(url)
 
 # Garantir que a coluna de data esteja em formato datetime
 if "data de recebimento" in df.columns:
@@ -37,7 +40,7 @@ st.pyplot(fig1)
 # Gráfico por Assunto
 # ======================
 st.subheader("Quantidade de Processos por Assunto")
-assunto_counts = df["assunto"].value_counts().head(20)  # pega só os 20 mais comuns para não poluir
+assunto_counts = df["assunto"].value_counts().head(20)  # pega só os 20 mais comuns
 
 fig2, ax2 = plt.subplots()
 assunto_counts.plot(kind="bar", ax=ax2)
