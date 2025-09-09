@@ -9,16 +9,21 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 
-# Configuração inicial
 st.set_page_config(page_title="Análise de Processos", layout="wide")
 
-# URL do CSV no GitHub (substitua pelo seu link raw!)
-url = "https://raw.githubusercontent.com/brunorestum/processos-raissa/38a86363c7ff30c639912e81d8bc6ddafc18d08a/processos.csv"
+# Substitua pelo link RAW do GitHub
+url = "https://raw.githubusercontent.com/usuario/repositorio/main/processos.csv"
 
-# Carregar CSV direto do GitHub
 df = pd.read_csv(url)
 
-# Garantir que a coluna de data esteja em formato datetime
+# Mostrar colunas disponíveis
+st.write("📑 Colunas no CSV:")
+st.write(df.columns.tolist())
+
+# Padronizar nomes (remover espaços extras e deixar tudo minúsculo)
+df.columns = df.columns.str.strip().str.lower()
+
+# Agora tentamos usar os nomes padronizados
 if "data de recebimento" in df.columns:
     df["data de recebimento"] = pd.to_datetime(df["data de recebimento"], errors="coerce")
 
@@ -27,33 +32,38 @@ st.title("📊 Dashboard de Processos")
 # ======================
 # Gráfico por Tipo Assunto
 # ======================
-st.subheader("Quantidade de Processos por Tipo de Assunto")
-tipo_counts = df["tipo assunto"].value_counts()
+if "tipo assunto" in df.columns:
+    st.subheader("Quantidade de Processos por Tipo de Assunto")
+    tipo_counts = df["tipo assunto"].value_counts()
 
-fig1, ax1 = plt.subplots()
-tipo_counts.plot(kind="bar", ax=ax1)
-ax1.set_ylabel("Quantidade de Processos")
-ax1.set_xlabel("Tipo de Assunto")
-st.pyplot(fig1)
+    fig1, ax1 = plt.subplots()
+    tipo_counts.plot(kind="bar", ax=ax1)
+    ax1.set_ylabel("Quantidade de Processos")
+    ax1.set_xlabel("Tipo de Assunto")
+    st.pyplot(fig1)
+else:
+    st.warning("❌ Coluna 'tipo assunto' não encontrada no CSV.")
 
 # ======================
 # Gráfico por Assunto
 # ======================
-st.subheader("Quantidade de Processos por Assunto")
-assunto_counts = df["assunto"].value_counts().head(20)  # pega só os 20 mais comuns
+if "assunto" in df.columns:
+    st.subheader("Quantidade de Processos por Assunto")
+    assunto_counts = df["assunto"].value_counts().head(20)
 
-fig2, ax2 = plt.subplots()
-assunto_counts.plot(kind="bar", ax=ax2)
-ax2.set_ylabel("Quantidade de Processos")
-ax2.set_xlabel("Assunto")
-st.pyplot(fig2)
+    fig2, ax2 = plt.subplots()
+    assunto_counts.plot(kind="bar", ax=ax2)
+    ax2.set_ylabel("Quantidade de Processos")
+    ax2.set_xlabel("Assunto")
+    st.pyplot(fig2)
+else:
+    st.warning("❌ Coluna 'assunto' não encontrada no CSV.")
 
 # ======================
 # Linha do Tempo por Data de Recebimento
 # ======================
-st.subheader("📅 Evolução dos Processos por Data de Recebimento")
-
 if "data de recebimento" in df.columns:
+    st.subheader("📅 Evolução dos Processos por Data de Recebimento")
     timeline = df.groupby("data de recebimento").size()
 
     fig3, ax3 = plt.subplots()
@@ -62,4 +72,4 @@ if "data de recebimento" in df.columns:
     ax3.set_xlabel("Data de Recebimento")
     st.pyplot(fig3)
 else:
-    st.warning("A coluna 'data de recebimento' não foi encontrada no CSV.")
+    st.warning("❌ Coluna 'data de recebimento' não encontrada no CSV.")
