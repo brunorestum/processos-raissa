@@ -12,45 +12,36 @@ import matplotlib.pyplot as plt
 st.set_page_config(page_title="Análise de Processos", layout="wide")
 st.title("📊 Dashboard de Processos")
 
-# 🔗 CSV direto do GitHub (RAW link público)
+# 🔗 CSV direto do GitHub
 url = "https://raw.githubusercontent.com/brunorestum/processos-raissa/334e145bb22f3ffd8b205bc0c4e5f880b5e7d0da/processos.csv"
 
-# --- Leitura robusta do CSV ---
-def read_csv_resilient(src_url: str) -> pd.DataFrame:
-    try:
-        df_try = pd.read_csv(src_url, sep=None, engine="python", encoding="utf-8")
-        if df_try.shape[1] > 1:
-            return df_try
-    except Exception:
-        pass
-    try:
-        df_try = pd.read_csv(src_url, sep=";", encoding="latin1")
-        if df_try.shape[1] > 1:
-            return df_try
-    except Exception:
-        pass
-    try:
-        df_try = pd.read_csv(src_url, sep=",", encoding="latin1")
-        return df_try
-    except Exception:
-        st.error("❌ Não foi possível ler o CSV pela URL. Verifique o link RAW.")
-        st.stop()
+# --- Ler CSV corrigindo encoding ---
+df = pd.read_csv(url, encoding="latin1", sep=",", engine="python")
 
-df = read_csv_resilient(url)
+# --- Normalizar nomes de colunas ---
+df.columns = (
+    df.columns.str.strip()  # remove espaços extras
+    .str.lower()            # tudo minúsculo
+    .str.replace(" ", "_")  # troca espaço por underline
+    .str.replace("ã", "a")  # corrige acento
+    .str.replace("â", "a")
+    .str.replace("ó", "o")
+    .str.replace("ô", "o")
+)
 
-# --- Renomear colunas por posição ---
-num_cols = len(df.columns)
-ren_map = {}
-if num_cols >= 2: ren_map[df.columns[1]] = "assunto"
-if num_cols >= 4: ren_map[df.columns[3]] = "data_recebimento"
-if num_cols >= 7: ren_map[df.columns[6]] = "tipo_assunto"
+# --- Renomear colunas específicas ---
+ren_map = {
+    df.columns[1]: "assunto",
+    df.columns[3]: "data_recebimento",
+    df.columns[6]: "tipo_assunto",
+}
 df = df.rename(columns=ren_map)
 
-# Mostrar colunas detectadas
-st.write("📑 Colunas no CSV após renomeio:")
+# Mostrar colunas finais
+st.write("📑 Colunas no CSV após limpeza e renomeio:")
 st.write(df.columns.tolist())
 
-# Converter datas
+# Converter data
 if "data_recebimento" in df.columns:
     df["data_recebimento"] = pd.to_datetime(df["data_recebimento"], errors="coerce", dayfirst=True)
 
@@ -66,7 +57,7 @@ if "tipo_assunto" in df.columns:
     ax1.set_xlabel("Tipo de Assunto")
     st.pyplot(fig1)
 else:
-    st.warning("❌ Coluna 'tipo_assunto' não encontrada (7ª coluna).")
+    st.warning("❌ Coluna 'tipo_assunto' não encontrada.")
 
 # ======================
 # Gráfico por Assunto
@@ -80,10 +71,10 @@ if "assunto" in df.columns:
     ax2.set_xlabel("Assunto")
     st.pyplot(fig2)
 else:
-    st.warning("❌ Coluna 'assunto' não encontrada (2ª coluna).")
+    st.warning("❌ Coluna 'assunto' não encontrada.")
 
 # ======================
-# Linha do Tempo por Data de Recebimento
+# Linha do Tempo
 # ======================
 st.subheader("📅 Evolução dos Processos por Data de Recebimento")
 if "data_recebimento" in df.columns:
@@ -103,4 +94,4 @@ if "data_recebimento" in df.columns:
     else:
         st.info("⚠️ Nenhuma data válida encontrada em 'data_recebimento'.")
 else:
-    st.warning("❌ Coluna 'data_recebimento' não encontrada (4ª coluna).")
+    st.warning("❌ Coluna 'data_recebimento' não encontrada.")
