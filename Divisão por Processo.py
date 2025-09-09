@@ -12,17 +12,14 @@ import matplotlib.pyplot as plt
 st.set_page_config(page_title="Análise de Processos", layout="wide")
 st.title("📊 Dashboard de Processos")
 
-# 🔗 CSV direto do GitHub
+# 🔗 Excel direto do GitHub
 url = "https://raw.githubusercontent.com/brunorestum/processos-raissa/8865afb5a4f900a6322d5559ce2c669bedda799d/processos.xlsx"
 
-# --- Ler CSV com encoding correto e checar separador ---
-try:
-    df = pd.read_csv(url, encoding="latin1", sep=",", engine="python")
-except Exception:
-    df = pd.read_csv(url, encoding="latin1", sep=";", engine="python")
+# --- Ler Excel ---
+df = pd.read_excel(url, engine="openpyxl")
 
 # Mostrar colunas
-st.write("📑 Colunas do CSV:")
+st.write("📑 Colunas do Excel:")
 st.write(df.columns.tolist())
 
 # --- Converter data ---
