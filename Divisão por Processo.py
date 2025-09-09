@@ -13,7 +13,7 @@ st.set_page_config(page_title="Análise de Processos", layout="wide")
 st.title("📊 Dashboard de Processos")
 
 # 🔗 CSV direto do GitHub
-url = "https://raw.githubusercontent.com/brunorestum/processos-raissa/334e145bb22f3ffd8b205bc0c4e5f880b5e7d0da/processos.csv"
+url = "https://raw.githubusercontent.com/brunorestum/processos-raissa/e9151c65976c3cbe606f74d1006fbc952d87e120/processos.csv"
 
 # --- Ler CSV com encoding correto e checar separador ---
 try:
