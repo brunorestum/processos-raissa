@@ -12,8 +12,7 @@ import matplotlib.pyplot as plt
 st.set_page_config(page_title="Análise de Processos", layout="wide")
 
 # Substitua pelo link RAW do GitHub
-url = "https://raw.githubusercontent.com/usuario/repositorio/main/processos.csv"
-
+url = "https://raw.githubusercontent.com/brunorestum/processos-raissa/334e145bb22f3ffd8b205bc0c4e5f880b5e7d0da/processos.csv"
 df = pd.read_csv(url)
 
 # Mostrar colunas disponíveis
