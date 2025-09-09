@@ -15,3 +15,7 @@ reportlab
 seaborn
 matplotlib
 openpyxl
+scikit-learn
+matplotlib
+wordcloud
+
