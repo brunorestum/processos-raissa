@@ -15,33 +15,44 @@ st.title("📊 Dashboard de Processos")
 # 🔗 CSV direto do GitHub
 url = "https://raw.githubusercontent.com/brunorestum/processos-raissa/334e145bb22f3ffd8b205bc0c4e5f880b5e7d0da/processos.csv"
 
-# --- Ler CSV corrigindo encoding ---
-df = pd.read_csv(url, encoding="latin1", sep=",", engine="python")
+# --- Ler CSV com encoding correto e checar separador ---
+try:
+    df = pd.read_csv(url, encoding="latin1", sep=",", engine="python")
+except Exception:
+    df = pd.read_csv(url, encoding="latin1", sep=";", engine="python")
+
+# Mostrar colunas originais
+st.write("📑 Colunas originais do CSV:")
+st.write(df.columns.tolist())
 
 # --- Normalizar nomes de colunas ---
 df.columns = (
-    df.columns.str.strip()  # remove espaços extras
-    .str.lower()            # tudo minúsculo
-    .str.replace(" ", "_")  # troca espaço por underline
-    .str.replace("ã", "a")  # corrige acento
+    df.columns.str.strip()
+    .str.lower()
+    .str.replace(" ", "_")
+    .str.replace("ã", "a")
     .str.replace("â", "a")
     .str.replace("ó", "o")
     .str.replace("ô", "o")
+    .str.replace("ç", "c")
 )
 
-# --- Renomear colunas específicas ---
-ren_map = {
-    df.columns[1]: "assunto",
-    df.columns[3]: "data_recebimento",
-    df.columns[6]: "tipo_assunto",
-}
+# --- Forçar renomeio se colunas existirem ---
+ren_map = {}
+if len(df.columns) >= 2:
+    ren_map[df.columns[1]] = "assunto"
+if len(df.columns) >= 4:
+    ren_map[df.columns[3]] = "data_recebimento"
+if len(df.columns) >= 7:
+    ren_map[df.columns[6]] = "tipo_assunto"
+
 df = df.rename(columns=ren_map)
 
 # Mostrar colunas finais
 st.write("📑 Colunas no CSV após limpeza e renomeio:")
 st.write(df.columns.tolist())
 
-# Converter data
+# --- Converter data ---
 if "data_recebimento" in df.columns:
     df["data_recebimento"] = pd.to_datetime(df["data_recebimento"], errors="coerce", dayfirst=True)
 
@@ -95,3 +106,4 @@ if "data_recebimento" in df.columns:
         st.info("⚠️ Nenhuma data válida encontrada em 'data_recebimento'.")
 else:
     st.warning("❌ Coluna 'data_recebimento' não encontrada.")
+
