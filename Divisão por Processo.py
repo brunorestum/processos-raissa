@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 st.set_page_config(page_title="Análise de Processos", layout="wide")
 st.title("📊 Dashboard de Processos")
 
-# Excel do GitHub
+# Excel direto do GitHub
 url = "https://raw.githubusercontent.com/brunorestum/processos-raissa/8865afb5a4f900a6322d5559ce2c669bedda799d/processos.xlsx"
 df = pd.read_excel(url, engine="openpyxl")
 
@@ -59,15 +59,16 @@ if "data" in df.columns:
 st.subheader("☁️ Radicais mais frequentes nos Assuntos")
 
 if "assunto" in df.columns:
+    # Stopwords básicas em português
     stopwords_pt = set([
         "de", "do", "da", "em", "para", "com", "sem",
         "a", "o", "e", "os", "as", "um", "uma",
         "por", "na", "no", "nas", "nos", "se"
     ])
 
-    # Função simples para extrair radical (remoção de sufixos comuns)
+    # Função simples para extrair radical
     def extrair_radical(palavra):
-        sufixos = ["mente", "ções", "ção", "s", "es", "e", "a", "o"]
+        sufixos = ["mente", "ções", "ção", "s", "es", "e", "a", "o","doria"]
         for suf in sufixos:
             if palavra.endswith(suf) and len(palavra) > len(suf) + 2:
                 return palavra[:-len(suf)]
@@ -84,7 +85,8 @@ if "assunto" in df.columns:
     # Criar WordCloud
     texto_wc = " ".join(radicais)
     wordcloud = WordCloud(
-        width=800, height=400,
+        width=800,
+        height=400,
         background_color="white",
         colormap="viridis"
     ).generate(texto_wc)
