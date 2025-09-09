@@ -8,8 +8,6 @@ Created on Mon Sep  8 21:02:52 2025
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.cluster import KMeans
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 
@@ -78,53 +76,29 @@ if "data" in df.columns:
         st.plotly_chart(fig3, use_container_width=True)
 
 # ======================
-# Agrupamento de Assuntos (PNL + KMeans)
-# ======================
-st.subheader("🤖 Agrupamento de Assuntos (NLP)")
-
-if "assunto" in df.columns:
-    textos = df["assunto"].dropna().astype(str)
-
-    # Lista simples de stopwords em português
-    stopwords_pt = {
-    "de", "do", "da", "em", "para", "com", "sem",
-    "a", "o", "e", "os", "as", "um", "uma",
-    "por", "na", "no", "nas", "nos", "se"
-}
-
-vectorizer = TfidfVectorizer(stop_words=frozenset(stopwords_pt))
-    X = vectorizer.fit_transform(textos)
-
-    # KMeans
-    n_clusters = 5  # número de grupos de assuntos
-    kmeans = KMeans(n_clusters=n_clusters, random_state=42, n_init=10)
-    clusters = kmeans.fit_predict(X)
-
-    df_clusters = pd.DataFrame({"assunto": textos, "cluster": clusters})
-    fig4 = px.histogram(
-        df_clusters,
-        x="cluster",
-        color="cluster",
-        title="Distribuição de Assuntos por Cluster"
-    )
-    st.plotly_chart(fig4, use_container_width=True)
-
-    st.write("🔍 Exemplos de assuntos por cluster:")
-    for c in range(n_clusters):
-        exemplos = df_clusters[df_clusters["cluster"] == c]["assunto"].head(5).tolist()
-        st.markdown(f"**Cluster {c}:** {', '.join(exemplos)}")
-
-
-# ======================
 # WordCloud dos Assuntos
 # ======================
 st.subheader("☁️ Palavras mais frequentes nos Assuntos")
 
 if "assunto" in df.columns:
     texto_completo = " ".join(df["assunto"].dropna().astype(str))
-    wordcloud = WordCloud(width=800, height=400, background_color="white", colormap="viridis").generate(texto_completo)
+    
+    # Lista simples de stopwords em português
+    stopwords_pt = frozenset([
+        "de", "do", "da", "em", "para", "com", "sem",
+        "a", "o", "e", "os", "as", "um", "uma",
+        "por", "na", "no", "nas", "nos", "se"
+    ])
 
-    fig5, ax = plt.subplots(figsize=(10, 5))
+    wordcloud = WordCloud(
+        width=800,
+        height=400,
+        background_color="white",
+        colormap="viridis",
+        stopwords=stopwords_pt
+    ).generate(texto_completo)
+
+    fig4, ax = plt.subplots(figsize=(10, 5))
     ax.imshow(wordcloud, interpolation="bilinear")
     ax.axis("off")
-    st.pyplot(fig5)
+    st.pyplot(fig4)
