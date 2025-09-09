@@ -15,25 +15,28 @@ st.set_page_config(page_title="Análise de Processos", layout="wide")
 url = "https://raw.githubusercontent.com/brunorestum/processos-raissa/334e145bb22f3ffd8b205bc0c4e5f880b5e7d0da/processos.csv"
 df = pd.read_csv(url)
 
-# Mostrar colunas disponíveis
+# Forçar separador e encoding para corrigir a leitura
+df = pd.read_csv(url, sep=";", encoding="latin1")
+
+# Mostrar colunas para confirmar
 st.write("📑 Colunas no CSV:")
 st.write(df.columns.tolist())
 
-# Padronizar nomes (remover espaços extras e deixar tudo minúsculo)
+# Padronizar nomes (minúsculas, sem espaços extras)
 df.columns = df.columns.str.strip().str.lower()
 
-# Agora tentamos usar os nomes padronizados
-if "Data de Recebimento" in df.columns:
-    df["Data de Recebimento"] = pd.to_datetime(df["Data de Recebimento"], errors="coerce")
+# Converter data
+if "data de recebimento" in df.columns:
+    df["data de recebimento"] = pd.to_datetime(df["data de recebimento"], errors="coerce")
 
 st.title("📊 Dashboard de Processos")
 
 # ======================
 # Gráfico por Tipo Assunto
 # ======================
-if "Tipo Assunto" in df.columns:
+if "tipo assunto" in df.columns:
     st.subheader("Quantidade de Processos por Tipo de Assunto")
-    tipo_counts = df["Tipo Assunto"].value_counts()
+    tipo_counts = df["tipo assunto"].value_counts()
 
     fig1, ax1 = plt.subplots()
     tipo_counts.plot(kind="bar", ax=ax1)
@@ -46,9 +49,9 @@ else:
 # ======================
 # Gráfico por Assunto
 # ======================
-if "Assunto" in df.columns:
+if "assunto" in df.columns:
     st.subheader("Quantidade de Processos por Assunto")
-    assunto_counts = df["Assunto"].value_counts().head(20)
+    assunto_counts = df["assunto"].value_counts().head(20)
 
     fig2, ax2 = plt.subplots()
     assunto_counts.plot(kind="bar", ax=ax2)
@@ -61,9 +64,9 @@ else:
 # ======================
 # Linha do Tempo por Data de Recebimento
 # ======================
-if "Data de Recebimento" in df.columns:
+if "data de recebimento" in df.columns:
     st.subheader("📅 Evolução dos Processos por Data de Recebimento")
-    timeline = df.groupby("Data de Recebimento").size()
+    timeline = df.groupby("data de recebimento").size()
 
     fig3, ax3 = plt.subplots()
     timeline.plot(kind="line", ax=ax3, marker="o")
