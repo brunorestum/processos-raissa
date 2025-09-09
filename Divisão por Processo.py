@@ -21,54 +21,27 @@ try:
 except Exception:
     df = pd.read_csv(url, encoding="latin1", sep=";", engine="python")
 
-# Mostrar colunas originais
-st.write("📑 Colunas originais do CSV:")
-st.write(df.columns.tolist())
-
-# --- Normalizar nomes de colunas ---
-df.columns = (
-    df.columns.str.strip()
-    .str.lower()
-    .str.replace(" ", "_")
-    .str.replace("ã", "a")
-    .str.replace("â", "a")
-    .str.replace("ó", "o")
-    .str.replace("ô", "o")
-    .str.replace("ç", "c")
-)
-
-# --- Forçar renomeio se colunas existirem ---
-ren_map = {}
-if len(df.columns) >= 2:
-    ren_map[df.columns[1]] = "assunto"
-if len(df.columns) >= 4:
-    ren_map[df.columns[3]] = "data_recebimento"
-if len(df.columns) >= 7:
-    ren_map[df.columns[6]] = "tipo_assunto"
-
-df = df.rename(columns=ren_map)
-
-# Mostrar colunas finais
-st.write("📑 Colunas no CSV após limpeza e renomeio:")
+# Mostrar colunas
+st.write("📑 Colunas do CSV:")
 st.write(df.columns.tolist())
 
 # --- Converter data ---
-if "data_recebimento" in df.columns:
-    df["data_recebimento"] = pd.to_datetime(df["data_recebimento"], errors="coerce", dayfirst=True)
+if "data" in df.columns:
+    df["data"] = pd.to_datetime(df["data"], errors="coerce", dayfirst=True)
 
 # ======================
-# Gráfico por Tipo de Assunto
+# Gráfico por Tipo
 # ======================
-st.subheader("Quantidade de Processos por Tipo de Assunto")
-if "tipo_assunto" in df.columns:
-    tipo_counts = df["tipo_assunto"].dropna().astype(str).value_counts()
+st.subheader("Quantidade de Processos por Tipo")
+if "tipo" in df.columns:
+    tipo_counts = df["tipo"].dropna().astype(str).value_counts()
     fig1, ax1 = plt.subplots()
     tipo_counts.plot(kind="bar", ax=ax1)
     ax1.set_ylabel("Quantidade de Processos")
-    ax1.set_xlabel("Tipo de Assunto")
+    ax1.set_xlabel("Tipo")
     st.pyplot(fig1)
 else:
-    st.warning("❌ Coluna 'tipo_assunto' não encontrada.")
+    st.warning("❌ Coluna 'tipo' não encontrada.")
 
 # ======================
 # Gráfico por Assunto
@@ -87,11 +60,11 @@ else:
 # ======================
 # Linha do Tempo
 # ======================
-st.subheader("📅 Evolução dos Processos por Data de Recebimento")
-if "data_recebimento" in df.columns:
+st.subheader("📅 Evolução dos Processos por Data")
+if "data" in df.columns:
     timeline = (
-        df.dropna(subset=["data_recebimento"])
-          .assign(data=df["data_recebimento"].dt.date)
+        df.dropna(subset=["data"])
+          .assign(data=df["data"].dt.date)
           .groupby("data")
           .size()
           .sort_index()
@@ -100,10 +73,9 @@ if "data_recebimento" in df.columns:
         fig3, ax3 = plt.subplots()
         timeline.plot(kind="line", ax=ax3, marker="o")
         ax3.set_ylabel("Quantidade de Processos")
-        ax3.set_xlabel("Data de Recebimento")
+        ax3.set_xlabel("Data")
         st.pyplot(fig3)
     else:
-        st.info("⚠️ Nenhuma data válida encontrada em 'data_recebimento'.")
+        st.info("⚠️ Nenhuma data válida encontrada em 'data'.")
 else:
-    st.warning("❌ Coluna 'data_recebimento' não encontrada.")
-
+    st.warning("❌ Coluna 'data' não encontrada.")
