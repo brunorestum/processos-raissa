@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 st.set_page_config(page_title="Análise de Processos", layout="wide")
 
 # URL do CSV no GitHub (substitua pelo seu link raw!)
-url = "https://raw.githubusercontent.com/usuario/repositorio/branch/processos.csv"
+url = "https://github.com/brunorestum/processos-raissa/blob/abfb3e7600f0aa26b97e0ad393b70e35ae6f0c15/processos.csv"
 
 # Carregar CSV direto do GitHub
 df = pd.read_csv(url)
