@@ -85,8 +85,15 @@ st.subheader("🤖 Agrupamento de Assuntos (NLP)")
 if "assunto" in df.columns:
     textos = df["assunto"].dropna().astype(str)
 
-    # Vetorização TF-IDF
-    vectorizer = TfidfVectorizer(stop_words="portuguese")
+    # Lista simples de stopwords em português
+    stopwords_pt = [
+        "de", "do", "da", "em", "para", "com", "sem",
+        "a", "o", "e", "os", "as", "um", "uma",
+        "por", "na", "no", "nas", "nos", "se"
+    ]
+
+    # Vetorização TF-IDF com stopwords manuais
+    vectorizer = TfidfVectorizer(stop_words=stopwords_pt)
     X = vectorizer.fit_transform(textos)
 
     # KMeans
@@ -95,13 +102,19 @@ if "assunto" in df.columns:
     clusters = kmeans.fit_predict(X)
 
     df_clusters = pd.DataFrame({"assunto": textos, "cluster": clusters})
-    fig4 = px.histogram(df_clusters, x="cluster", color="cluster", title="Distribuição de Assuntos por Cluster")
+    fig4 = px.histogram(
+        df_clusters,
+        x="cluster",
+        color="cluster",
+        title="Distribuição de Assuntos por Cluster"
+    )
     st.plotly_chart(fig4, use_container_width=True)
 
     st.write("🔍 Exemplos de assuntos por cluster:")
     for c in range(n_clusters):
         exemplos = df_clusters[df_clusters["cluster"] == c]["assunto"].head(5).tolist()
         st.markdown(f"**Cluster {c}:** {', '.join(exemplos)}")
+
 
 # ======================
 # WordCloud dos Assuntos
